@@ -1,0 +1,27 @@
+#!/bin/bash
+
+PREPROCESS_OPTION=""
+RC_OPTION=""
+while (( "$#" )); do
+  case "$1" in
+    -I*|-D*|/I*|/D*)
+      PREPROCESS_OPTION="$PREPROCESS_OPTION $1"
+      shift
+      ;;
+    /fo*)
+      DST="${1:3}"
+      shift
+      ;;
+    *)
+      if [[ -f "$1" ]]; then
+        SRC="$1"
+      else
+        RC_OPTION="$RC_OPTION $1"
+      fi
+      shift
+      ;;
+  esac
+done
+
+"@LLVM_NATIVE_TOOLCHAIN@/bin/llvm-rc" $RC_OPTION /fo "$DST" <("@LLVM_NATIVE_TOOLCHAIN@/bin/clang-cl" $PREPROCESS_OPTION /EP /TC "$SRC")
+
